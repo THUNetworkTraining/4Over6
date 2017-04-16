@@ -29,8 +29,9 @@ void BackEnd::initializeSocket() {
 }
 
 void BackEnd::readSettings(const char *filename) {
+    filename = (curPath + "/" + std::string(filename)).c_str();
     FILE* f = fopen(filename,"r+");
-    LOGD("file %s opened %d %d", filename, f, errno);
+    LOGD("file %s opened %d %d %s", filename, f, errno, strerror(errno));
     char buffer[4096];
     fread(buffer,1,4096,f);
     Json::Reader reader;
@@ -102,7 +103,8 @@ void BackEnd::establishPipes() {
 }
 
 void BackEnd::getTnu() {
-    while(readPipe(this->tnuPipeName, &this->tnu, sizeof(int) < 4)){
+    LOGD("waiting for tnu from frontend");
+    while(readPipe(this->tnuPipeName, &this->tnu, sizeof(int)) < 4){
         /* wait */
     }
     LOGD("tnu from frontend : %d",tnu);
@@ -124,6 +126,7 @@ void BackEnd::run(char settingfile[]) {
     this->readSettings(settingfile);
     this->initializeSocket();
     this->establishPipes();
+    this->requireIP();
     this->setTimer();
     this->getTnu();
     this->createTnuThread();

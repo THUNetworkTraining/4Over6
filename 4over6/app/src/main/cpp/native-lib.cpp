@@ -12,6 +12,7 @@ Java_thu409b_a4over6_MainActivity_runBackEnd(
         jobject /* this */, jstring curDir) {
     std::string hello = "time to write a backEnd";
     const char* dir = (*env).GetStringUTFChars(curDir,0);
-    settingTest(dir);
+    BackEnd backEnd(dir);
+    backEnd.run("settings.json");
     return env->NewStringUTF(hello.c_str());
 }
