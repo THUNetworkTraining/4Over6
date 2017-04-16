@@ -22,6 +22,7 @@
 #include <thread>
 #include "HeartbeatTimer.h"
 #include "TnuReader.h"
+#include "ServerResponseReader.h"
 
 class BackEnd {
 public:
@@ -42,9 +43,11 @@ private:
 
     HeartbeatTimer* timer;
     TnuReader* tnuReader;
+    ServerResponseReader* serverResponseReader;
 
     std::thread *timerThread;
     std::thread *tnuThread;
+    std::thread *serverResponseThread;
 
     std::string IPPipeName,tnuPipeName,flowPipeName;
 
@@ -62,8 +65,10 @@ public:
     void requireIP();                           //send 100 packet to server, wait for response, and write response via IPPipe
     void getTnu();
     void createTnuThread();
+    void createServerResponseThread();
 
     void heartbeatTimeout();
+    void checkAlive();
 };
 
 

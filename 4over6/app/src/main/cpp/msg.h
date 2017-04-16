@@ -31,6 +31,13 @@ struct IPResponse {
     uint32_t DNS[3];
 };
 
+/*
+ * pipenames:
+ *      IPPipe  :  used to write IPResponse to frontend
+ *      tnuPipe :  used to write tnu (a single int) to backend
+ *      flowPipe : used to write readFlow writeFlow readTimes writeTimes ( 4 ints ) to frontEnd
+ * */
+
 void writePipe(std::string pipeName, void* data, int length);
 
 int readPipe(std::string pipeName, void* data, int length);

@@ -112,6 +112,7 @@ void BackEnd::run(char settingfile[]) {
     this->setTimer();
     this->getTnu();
     this->createTnuThread();
+    this->createServerResponseThread();
 
 }
 
@@ -119,6 +120,19 @@ void BackEnd::createTnuThread() {
     this->tnuReader = new TnuReader(this->tnu, this->serverSocket);
     this->tnuThread = new std::thread(TnuReader::sRun, this->tnuReader);
 }
+
+void BackEnd::createServerResponseThread() {
+    this->serverResponseReader = new ServerResponseReader(this->serverSocket, this->tnu);
+    this->serverResponseThread = new std::thread(ServerResponseReader::sRun, this->serverResponseReader);
+}
+
+void BackEnd::checkAlive() {
+
+}
+
+
+
+
 
 
 
