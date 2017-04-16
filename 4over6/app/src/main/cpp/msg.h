@@ -8,6 +8,16 @@
 
 #include <stdint.h>
 #include <string>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
+
+#define IP_REQUEST 100
+#define IP_RESPONSE 101
+#define NET_REQUEST 102
+#define NET_RESPONSE 103
+#define IP_HEARTBEAT 104
 
 struct msg {
     int length;		//整个结构体的字节长度

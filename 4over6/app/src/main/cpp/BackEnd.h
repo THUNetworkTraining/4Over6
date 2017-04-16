@@ -18,20 +18,28 @@
 #include <string.h>
 #include "json/json.h"
 #include "CLog.h"
+#include <time.h>
+#include <thread>
+#include "HeartbeatTimer.h"
 
 class BackEnd {
 public:
-    static long long readFlow;
-    static long long writeFlow;
-    static long long lastHeartbeatTime;
+    static time_t readFlow;
+    static time_t writeFlow;
+    static int readTimes;
+    static int writeTimes;
+    static time_t lastHeartbeatTime;
 private:
     int serverSocket;
     struct in6_addr* serverAddr;
     short serverPort;
 
     int tnu;
+    int timerPid;
 
     std::string curPath;
+
+    std::thread *timerThread;
 
     std::string IPPipeName,tnuPipeName,flowPipeName;
 
@@ -45,6 +53,8 @@ public:
     void readTnu();
     void establishPipes();
     void setTimer();
+
+    void heartbeatTimeout();
 };
 
 

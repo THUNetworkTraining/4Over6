@@ -5,6 +5,12 @@
 #include "BackEnd.h"
 #include "msg.h"
 
+ time_t BackEnd::readFlow = 0;
+ time_t BackEnd::writeFlow = 0;
+ int BackEnd::readTimes = 0;
+ int BackEnd::writeTimes = 0;
+time_t BackEnd::lastHeartbeatTime = 0;
+
 
 void BackEnd::initializeSocket() {
     this->serverSocket = socket(PF_INET6, SOCK_STREAM, 0);
@@ -57,7 +63,7 @@ void BackEnd::setCurPath(std::string curPath) {
 
 void BackEnd::requireIP() {
     msg ipmsg;
-    ipmsg.type = 100;
+    ipmsg.type = IP_REQUEST;
     ipmsg.length = sizeof(int) + sizeof(char);
     write(this->serverSocket, (char*) &ipmsg, ipmsg.length);
 
@@ -86,8 +92,17 @@ void BackEnd::readTnu() {
 }
 
 void BackEnd::setTimer() {
+    HeartbeatTimer* timer = new HeartbeatTimer(this, this->flowPipeName, this->serverSocket);
+    timerThread = new std::thread(HeartbeatTimer::run, (void*)timer);
+    time(&this->lastHeartbeatTime);
+    LOGD("timer set");
+}
+
+void BackEnd::heartbeatTimeout() {
 
 }
+
+
 
 
 
