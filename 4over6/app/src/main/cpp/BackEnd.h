@@ -54,6 +54,7 @@ private:
 public:
     BackEnd();
     BackEnd(std::string curPath);
+    ~BackEnd();
 
     void run(char settingfile[]);
 

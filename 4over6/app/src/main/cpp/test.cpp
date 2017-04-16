@@ -40,6 +40,7 @@ void connectTest(BackEnd &backEnd) {
 
 void timerTest(BackEnd &backEnd) {
     backEnd.setTimer();
+    backEnd.checkAlive();
     LOGD("timeTestEnd");
 }
 

@@ -25,8 +25,8 @@ void HeartbeatTimer::mainLoop() {
         time_t t;
         time(&t);
         time_t heartbeatInterval = t - parent->lastHeartbeatTime;
-        //LOGD("timer counts %d",this->secCounter);
-        if(heartbeatInterval > 60*1000){
+        //LOGD("timer counts %d  interval  %d from %d",this->secCounter, heartbeatInterval, std::this_thread::get_id());
+        if(heartbeatInterval > 60){
             LOGD("Heartbeat timeout : %d!",heartbeatInterval);
             return;
         }

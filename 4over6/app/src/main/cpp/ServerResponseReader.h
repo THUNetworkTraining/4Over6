@@ -5,7 +5,7 @@
 #ifndef INC_4OVER6_SERVERRESPONSEREADER_H
 #define INC_4OVER6_SERVERRESPONSEREADER_H
 
-extern  class BackEnd
+extern  class BackEnd;
 
 class ServerResponseReader {
     int serverSocket;

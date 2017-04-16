@@ -49,11 +49,25 @@ void BackEnd::readSettings(const char *filename) {
 
 BackEnd::BackEnd() {
     this->serverAddr = new in6_addr();
+
+    this->timerThread = 0;
+    this->tnuReader = 0;
+    this->tnuThread = 0;
+    this->serverResponseReader = 0;
+    this->serverResponseThread = 0;
+    this->timer = 0;
 }
 
 BackEnd::BackEnd(std::string curPath) {
     this->serverAddr = new in6_addr();
     this->curPath = curPath;
+
+    this->timerThread = 0;
+    this->tnuReader = 0;
+    this->tnuThread = 0;
+    this->serverResponseReader = 0;
+    this->serverResponseThread = 0;
+    this->timer = 0;
 }
 
 void BackEnd::setCurPath(std::string curPath) {
@@ -102,7 +116,8 @@ void BackEnd::setTimer() {
 }
 
 void BackEnd::heartbeatTimeout() {
-
+    LOGE("timeout exiting....");
+    this->~BackEnd();
 }
 
 void BackEnd::run(char settingfile[]) {
@@ -113,6 +128,8 @@ void BackEnd::run(char settingfile[]) {
     this->getTnu();
     this->createTnuThread();
     this->createServerResponseThread();
+
+    this->checkAlive();
 
 }
 
@@ -127,8 +144,21 @@ void BackEnd::createServerResponseThread() {
 }
 
 void BackEnd::checkAlive() {
-
+    this->timerThread->join();
 }
+
+BackEnd::~BackEnd() {
+    LOGD("cleaning start");
+    delete this->serverResponseThread;
+    delete this->tnuThread;
+    delete this->serverResponseReader;
+    delete this->timer;
+    delete this->tnuReader;
+    delete this->timerThread;
+    LOGD("cleaning over");
+}
+
+
 
 
 
