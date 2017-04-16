@@ -21,6 +21,7 @@
 #include <time.h>
 #include <thread>
 #include "HeartbeatTimer.h"
+#include "TnuReader.h"
 
 class BackEnd {
 public:
@@ -39,20 +40,28 @@ private:
 
     std::string curPath;
 
+    HeartbeatTimer* timer;
+    TnuReader* tnuReader;
+
     std::thread *timerThread;
+    std::thread *tnuThread;
 
     std::string IPPipeName,tnuPipeName,flowPipeName;
 
 public:
     BackEnd();
     BackEnd(std::string curPath);
+
+    void run(char settingfile[]);
+
     void readSettings(const char* filename);
     void initializeSocket();
     void setCurPath(std::string curPath);
-    void requireIP();                           //send 100 packet to server, wait for response, and write response via IPPipe
-    void readTnu();
     void establishPipes();
     void setTimer();
+    void requireIP();                           //send 100 packet to server, wait for response, and write response via IPPipe
+    void getTnu();
+    void createTnuThread();
 
     void heartbeatTimeout();
 };

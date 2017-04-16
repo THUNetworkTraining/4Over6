@@ -9,10 +9,10 @@ void settingTest(std::string curDir) {
     BackEnd backEnd;
     backEnd.setCurPath(curDir);
 
-    char addr[] = "::1";
+    char addr[] = "2402:f000:1:4417::900";
     Json::Value root;
     root["addr"] = addr;
-    root["port"] = 1530;
+    root["port"] = 5678;
     std::string out = root.toStyledString();
     LOGD("%s",out.c_str());
     std::string filename = "settings.json";
@@ -28,13 +28,14 @@ void settingTest(std::string curDir) {
     LOGD("settings written");
 
     backEnd.readSettings(filename.c_str());
-    //connectTest(backEnd);
     backEnd.establishPipes();
+    connectTest(backEnd);
     timerTest(backEnd);
 }
 
 void connectTest(BackEnd &backEnd) {
     backEnd.initializeSocket();
+    backEnd.requireIP();
 }
 
 void timerTest(BackEnd &backEnd) {

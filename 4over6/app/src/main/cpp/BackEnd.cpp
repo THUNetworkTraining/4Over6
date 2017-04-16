@@ -37,7 +37,6 @@ void BackEnd::readSettings(const char *filename) {
     Json::Value root;
     if(reader.parse(buffer, root)) {
         const char* addr = root["addr"].asCString();
-        LOGD("read addr: %s", addr);
         inet_pton(AF_INET6, addr, this->serverAddr);
         this->serverPort = root["port"].asInt();
         LOGD("serverAddr: %s  ",addr);
@@ -72,6 +71,9 @@ void BackEnd::requireIP() {
     while(readSize = read(this->serverSocket, buffer, 500) < 5 ) { }
     msg *ipres = (msg*) buffer;
     IPResponse *response = (IPResponse*)ipres->data;
+    in_addr addr;
+    addr.s_addr = response->addr;
+    LOGD("IP from server: %s",inet_ntoa(addr));
     writePipe(this->IPPipeName, response, sizeof(IPResponse));
 }
 
@@ -85,14 +87,15 @@ void BackEnd::establishPipes() {
     mknod(this->flowPipeName.c_str(),S_IFIFO | 0666, 0);
 }
 
-void BackEnd::readTnu() {
+void BackEnd::getTnu() {
     while(readPipe(this->tnuPipeName, &this->tnu, sizeof(int) < 4)){
         /* wait */
     }
+    LOGD("tnu from frontend : %d",tnu);
 }
 
 void BackEnd::setTimer() {
-    HeartbeatTimer* timer = new HeartbeatTimer(this, this->flowPipeName, this->serverSocket);
+    timer = new HeartbeatTimer(this, this->flowPipeName, this->serverSocket);
     timerThread = new std::thread(HeartbeatTimer::run, (void*)timer);
     time(&this->lastHeartbeatTime);
     LOGD("timer set");
@@ -101,6 +104,25 @@ void BackEnd::setTimer() {
 void BackEnd::heartbeatTimeout() {
 
 }
+
+void BackEnd::run(char settingfile[]) {
+    this->readSettings(settingfile);
+    this->initializeSocket();
+    this->establishPipes();
+    this->setTimer();
+    this->getTnu();
+    this->createTnuThread();
+
+}
+
+void BackEnd::createTnuThread() {
+    this->tnuReader = new TnuReader(this->tnu, this->serverSocket);
+    this->tnuThread = new std::thread(TnuReader::sRun, this->tnuReader);
+}
+
+
+
+
 
 
 
