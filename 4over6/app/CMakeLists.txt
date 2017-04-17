@@ -18,7 +18,13 @@ add_library( # Sets the name of the library.
              # Associated headers in the same location as their source
              # file are automatically included.
              src/main/cpp/native-lib.cpp
-)
+             src/main/cpp/test.cpp
+             src/main/cpp/jsoncpp.cpp
+             src/main/cpp/BackEnd.cpp
+             src/main/cpp/msg.cpp
+             src/main/cpp/HeartbeatTimer.cpp
+             src/main/cpp/TnuReader.cpp
+             src/main/cpp/ServerResponseReader.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because system libraries are included in the search path by

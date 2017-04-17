@@ -2,8 +2,6 @@
 // Created by Administrator on 2017/3/19 0019.
 //
 
-#include <asm/fcntl.h>
-#include <unistd.h>
 #include "msg.h"
 #include "CLog.h"
 

@@ -10,4 +10,5 @@ void settingTest(std::string curDir);
 
 void connectTest(BackEnd &backEnd);
 
+void timerTest(BackEnd &backEnd);
 #endif //INC_4OVER6_TEST_H

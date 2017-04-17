@@ -18,33 +18,58 @@
 #include <string.h>
 #include "json/json.h"
 #include "CLog.h"
+#include <time.h>
+#include <thread>
+#include "HeartbeatTimer.h"
+#include "TnuReader.h"
+#include "ServerResponseReader.h"
 
 class BackEnd {
 public:
-    static long long readFlow;
-    static long long writeFlow;
-    static long long lastHeartbeatTime;
+    static time_t readFlow;
+    static time_t writeFlow;
+    static int readTimes;
+    static int writeTimes;
+    static time_t lastHeartbeatTime;
 private:
     int serverSocket;
     struct in6_addr* serverAddr;
     short serverPort;
 
     int tnu;
+    int timerPid;
 
     std::string curPath;
+
+    HeartbeatTimer* timer;
+    TnuReader* tnuReader;
+    ServerResponseReader* serverResponseReader;
+
+    std::thread *timerThread;
+    std::thread *tnuThread;
+    std::thread *serverResponseThread;
 
     std::string IPPipeName,tnuPipeName,flowPipeName;
 
 public:
     BackEnd();
     BackEnd(std::string curPath);
+    ~BackEnd();
+
+    void run(char settingfile[]);
+
     void readSettings(const char* filename);
     void initializeSocket();
     void setCurPath(std::string curPath);
-    void requireIP();                           //send 100 packet to server, wait for response, and write response via IPPipe
-    void readTnu();
     void establishPipes();
     void setTimer();
+    void requireIP();                           //send 100 packet to server, wait for response, and write response via IPPipe
+    void getTnu();
+    void createTnuThread();
+    void createServerResponseThread();
+
+    void heartbeatTimeout();
+    void checkAlive();
 };
 
 

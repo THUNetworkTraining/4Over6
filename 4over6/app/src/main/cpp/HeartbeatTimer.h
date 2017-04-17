@@ -5,18 +5,28 @@
 #ifndef INC_4OVER6_HEARTBEATTIMER_H
 #define INC_4OVER6_HEARTBEATTIMER_H
 
-#include "BackEnd.h"
+
 #include "msg.h"
+#include <time.h>
+#include "CLog.h"
 
-class HeartbeatTimer {
+extern class BackEnd;
+
+class HeartbeatTimer{
     BackEnd* parent;
-
+    int serverSocket;
     std::string flowPipeName;
+
     int secCounter;
 
-    HeartbeatTimer(BackEnd* parent, std::string flowPipeName);
-    void sendFlows();
+public:
+    HeartbeatTimer();
+    HeartbeatTimer(BackEnd* parent, std::string flowPipeName, int serverSocket);
     void mainLoop();
+    static void run(void* timerPtr);
+private:
+    void sendFlows();
+    void sendHeartbeat();
 };
 
 
