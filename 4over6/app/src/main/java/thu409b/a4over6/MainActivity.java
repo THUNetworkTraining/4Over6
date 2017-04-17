@@ -1,10 +1,13 @@
 package thu409b.a4over6;
 
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -12,6 +15,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean flag = false;
     public static TextView ti;
     public static Handler handler;
+    public static File extDir;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,9 +41,23 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        //setup ip/tnu/flow pipe
+        extDir = Environment.getExternalStorageDirectory();
+        try {
+            File file = new File(extDir, "IPPipe");
+            file.createNewFile();
+            file = new File(extDir, "tnuPipe");
+            file.createNewFile();
+            file = new File(extDir, "flowPipe");
+            file.createNewFile();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+
     // Example of a call to a native method
     TextView tv = (TextView) findViewById(R.id.sample_text);
-    tv.setText(runBackEnd(this.getFilesDir().toString()));
+    tv.setText(runBackEnd(extDir.toString()));
 
         //timer output shower
         TextView to = (TextView)findViewById(R.id.timerOutput);

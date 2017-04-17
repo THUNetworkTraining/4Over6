@@ -1,6 +1,8 @@
 package thu409b.a4over6;
 
 import android.os.Environment;
+import android.util.Log;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,8 +12,7 @@ import java.io.FileInputStream;
  */
 public class Timer {
     public static void runTimer() {
-        File extDir = Environment.getExternalStorageDirectory();
-        File file = new File(extDir, "cmd_pipe");
+        File file = new File(MainActivity.extDir, "IPPipe");
         int readlen = -1;
         byte[] readBuf = new byte[1024];
         while(true) {
