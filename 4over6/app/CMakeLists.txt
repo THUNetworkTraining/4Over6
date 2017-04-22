@@ -24,7 +24,8 @@ add_library( # Sets the name of the library.
              src/main/cpp/msg.cpp
              src/main/cpp/HeartbeatTimer.cpp
              src/main/cpp/TnuReader.cpp
-             src/main/cpp/ServerResponseReader.cpp)
+             src/main/cpp/ServerResponseReader.cpp
+             src/main/cpp/v4Packet.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because system libraries are included in the search path by

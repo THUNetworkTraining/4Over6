@@ -10,11 +10,12 @@ extern class BackEnd;
 class TnuReader {
     int tnu;
     int serverSocket;
+    int allocedAddr;
 
     void readTnu();
 
 public:
-    TnuReader(int tnu, int serverSocket);
+    TnuReader(int tnu, int serverSocket, int allocedAddr);
     static void sRun(TnuReader* ptr);
     void run();
 };

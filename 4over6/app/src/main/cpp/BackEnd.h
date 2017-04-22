@@ -26,14 +26,15 @@
 
 class BackEnd {
 public:
-    static time_t readFlow;
-    static time_t writeFlow;
-    static int readTimes;
-    static int writeTimes;
+    static long long readFlow;
+    static long long writeFlow;
+    static long long readTimes;
+    static long long writeTimes;
     static time_t lastHeartbeatTime;
 private:
     int serverSocket;
     struct in6_addr* serverAddr;
+    struct in_addr allocedAddr;
     short serverPort;
 
     int tnu;

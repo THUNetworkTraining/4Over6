@@ -26,10 +26,10 @@ struct msg {
 };
 
 struct IPResponse {
-    uint32_t  addr;
-    uint32_t route;
-    uint32_t DNS[3];
-};
+      uint32_t  addr;
+      uint32_t route;
+      uint32_t DNS[3];
+  };
 
 /*
  * pipenames:

@@ -5,10 +5,10 @@
 #include "BackEnd.h"
 #include "msg.h"
 
- time_t BackEnd::readFlow = 0;
- time_t BackEnd::writeFlow = 0;
- int BackEnd::readTimes = 0;
- int BackEnd::writeTimes = 0;
+ long long BackEnd::readFlow = 0;
+ long long BackEnd::writeFlow = 0;
+ long long BackEnd::readTimes = 0;
+ long long BackEnd::writeTimes = 0;
 time_t BackEnd::lastHeartbeatTime = 0;
 
 
@@ -50,6 +50,7 @@ void BackEnd::readSettings(const char *filename) {
 
 BackEnd::BackEnd() {
     this->serverAddr = new in6_addr();
+    this->tnu = 0;
 
     this->timerThread = 0;
     this->tnuReader = 0;
@@ -62,6 +63,7 @@ BackEnd::BackEnd() {
 BackEnd::BackEnd(std::string curPath) {
     this->serverAddr = new in6_addr();
     this->curPath = curPath;
+    this->tnu = 0;
 
     this->timerThread = 0;
     this->tnuReader = 0;
@@ -80,16 +82,53 @@ void BackEnd::requireIP() {
     ipmsg.type = IP_REQUEST;
     ipmsg.length = sizeof(int) + sizeof(char);
     write(this->serverSocket, (char*) &ipmsg, ipmsg.length);
-
+    LOGD("requiring IP");
     char buffer[500] = {0};
     int readSize = 0;
-    while(readSize = read(this->serverSocket, buffer, 500) < 5 ) { }
+    while((readSize = read(this->serverSocket, buffer, 500)) < 5 ) { }
     msg *ipres = (msg*) buffer;
-    IPResponse *response = (IPResponse*)ipres->data;
+    char data[1000];
+    memset(data, 0, 1000);
+    LOGD("readSize %d",readSize);
+    memcpy(data,ipres->data,readSize-5);
+    LOGD("IP strings %s",data);
+    data[readSize-5] = '\0';
+    int prevPtr = 0;
+    int nextPtr = 0;
+    int intAddrs[5];
+    for(int i = 0; i < 5; i++) {        //split 5 ip strings according to " " or "\0"
+        char addr[50];
+        in_addr addrStruct;
+        memset(addr, 0, 50);
+        while(data[nextPtr] != ' ' && data[nextPtr] != '\0')        //find next " " or "\0"
+            nextPtr++;
+        strncpy(addr, data+prevPtr, nextPtr-prevPtr+1);               //copy substring between prevPtr and nextPtr
+        addr[nextPtr-prevPtr] = '\0';
+        prevPtr = ++nextPtr;
+        if(inet_aton(addr,&addrStruct) == 0)
+            LOGD("wrong addr transform %s!",addr);
+        intAddrs[i] = addrStruct.s_addr;
+    }
+    IPResponse response;
+    response.addr = intAddrs[0];
+    response.route = intAddrs[1];
+    response.DNS[0] = intAddrs[2];
+    response.DNS[1] = intAddrs[3];
+    response.DNS[2] = intAddrs[4];
+    allocedAddr.s_addr = response.addr;
     in_addr addr;
-    addr.s_addr = response->addr;
+    allocedAddr.s_addr = response.addr;
+    addr.s_addr = response.addr;
     LOGD("IP from server: %s",inet_ntoa(addr));
-    writePipe(this->IPPipeName, response, sizeof(IPResponse));
+    addr.s_addr = response.route;
+    LOGD("route from server: %s",inet_ntoa(addr));
+    addr.s_addr = response.DNS[0];
+    LOGD("DNS1 from server: %s",inet_ntoa(addr));
+    addr.s_addr = response.DNS[1];
+    LOGD("DNS2 from server: %s",inet_ntoa(addr));
+    addr.s_addr = response.DNS[2];
+    LOGD("DNS3 from server: %s",inet_ntoa(addr));
+    writePipe(this->IPPipeName, &response, sizeof(IPResponse));
 }
 
 void BackEnd::establishPipes() {
@@ -104,7 +143,8 @@ void BackEnd::establishPipes() {
 
 void BackEnd::getTnu() {
     LOGD("waiting for tnu from frontend");
-    while(readPipe(this->tnuPipeName, &this->tnu, sizeof(int)) < 4){
+    int readLen = 0;
+    while((readLen = readPipe(this->tnuPipeName, &(this->tnu), sizeof(int))) < 4){
         /* wait */
     }
     LOGD("tnu from frontend : %d",tnu);
@@ -137,7 +177,7 @@ void BackEnd::run(char settingfile[]) {
 }
 
 void BackEnd::createTnuThread() {
-    this->tnuReader = new TnuReader(this->tnu, this->serverSocket);
+    this->tnuReader = new TnuReader(this->tnu, this->serverSocket, this->allocedAddr.s_addr);
     this->tnuThread = new std::thread(TnuReader::sRun, this->tnuReader);
 }
 
@@ -151,14 +191,6 @@ void BackEnd::checkAlive() {
 }
 
 BackEnd::~BackEnd() {
-    LOGD("cleaning start");
-    delete this->serverResponseThread;
-    delete this->tnuThread;
-    delete this->serverResponseReader;
-    delete this->timer;
-    delete this->tnuReader;
-    delete this->timerThread;
-    LOGD("cleaning over");
 }
 
 

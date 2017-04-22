@@ -13,10 +13,13 @@ HeartbeatTimer::HeartbeatTimer(BackEnd *parent, std::string flowPipeName, int se
 }
 
 void HeartbeatTimer::sendFlows() {
-    writePipe(this->flowPipeName, &parent->readFlow, sizeof(parent->readFlow));
-    writePipe(this->flowPipeName, &parent->writeFlow, sizeof(parent->writeFlow));
-    writePipe(this->flowPipeName, &parent->readTimes, sizeof(parent->readTimes));
-    writePipe(this->flowPipeName, &parent->writeTimes, sizeof(parent->writeTimes));
+    long long buffer[4];
+    buffer[0] = parent->readFlow;
+    buffer[1] = parent->writeFlow;
+    buffer[2] = parent->readTimes;
+    buffer[3] = parent->writeTimes;
+    writePipe(this->flowPipeName, &buffer, sizeof(parent->readFlow)*4);
+    //LOGE("flows %lld %lld %lld %lld",buffer[0],buffer[1],buffer[2],buffer[3]);
 }
 
 void HeartbeatTimer::mainLoop() {
