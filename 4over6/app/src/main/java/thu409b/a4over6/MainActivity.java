@@ -1,5 +1,6 @@
 package thu409b.a4over6;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.VpnService;
@@ -32,11 +33,12 @@ public class MainActivity extends AppCompatActivity {
     //read ip(false) or traffic
     public static boolean flag = false;
     public static boolean flag1 = false;
-    private TextView ti;
+    private static TextView ti;
     public static Handler handler;
     public static File extDir;
     public static String IPv4Addr;
     public static String[] dns;
+    public static long preread = 0, prewrite = 0;
     public static long readFlow, writeFlow, readTimes, writeTimes = 0;
     private static GraphicalView chart;
     private static XYMultipleSeriesDataset dataset1;
@@ -47,15 +49,21 @@ public class MainActivity extends AppCompatActivity {
     private static Date[] xcache = new Date[N];
     private static long[] ycache = new long[N];
     private static TextView tv_ipv4Addr, tv_writeTimes, tv_writeFlow, tv_readIimes, tv_readFlow;
+    private static TextView tv_speedup, tv_speeddown;
+    private static MainActivity m;
+    private static long startTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        startTime = System.currentTimeMillis() / 1000;
+
         dns = new String[3];
         //test information shower
         ti = (TextView)findViewById(R.id.testInfo);
         ti.setText("");
+        m = this;
 
         //check wifi connection
         if(!CheckWifi.isWifiConnected(this)) {
@@ -78,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
         tv_writeFlow = (TextView)findViewById(R.id.tv_writeFlow);
         tv_readIimes = (TextView)findViewById(R.id.tv_readTimes);
         tv_readFlow = (TextView)findViewById(R.id.tv_readFlow);
+        tv_speedup = (TextView)findViewById(R.id.speedup);
+        tv_speeddown = (TextView)findViewById(R.id.speeddown);
 
         //setup ip/tnu/flow pipe
         extDir = Environment.getExternalStorageDirectory();
@@ -95,9 +105,13 @@ public class MainActivity extends AppCompatActivity {
             file.createNewFile();
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("addr", "2402:f000:1:4417::900");
-            //jsonObject.put("addr", "2402:f000:5:8301:c067:9565:1b90:7ec6");
             jsonObject.put("port", 5678);
-           //jsonObject.put("port",8888);
+            //jsonObject.put("addr", "2402:f000:5:8301:6322:c84f:b879:4a82");
+            //jsonObject.put("addr", "2402:f000:5:8301:6fd8:7d10:39de:d030");
+            /*jsonObject.put("addr", "2402:f000:5:8401::bbbb:2");
+            jsonObject.put("port",1313);*/
+            /*jsonObject.put("addr", "2402:f000:5:8301:b4e1:d5fc:61b3:cf83");
+            jsonObject.put("port",8888);*/
             byte[] bytes = jsonObject.toString().getBytes();
             FileOutputStream fileOutputStream = new FileOutputStream(file);
             BufferedOutputStream out = new BufferedOutputStream(fileOutputStream);
@@ -109,17 +123,21 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-    // Example of a call to a native method
+    //run back end
     Thread thread0 = new Thread(new Runnable() {
         @Override
         public void run() {
             runBackEnd(extDir.toString());
+            Log.e("BackEnd","BackEnd exit!");
+            MainActivity.m.finish();
+            System.exit(0);
         }
     });
     thread0.start();
 
-        //run timer
         handler = new Handler();
+
+        //run timer
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -127,22 +145,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         thread.start();
-        try {
-            thread.join();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Log.i("4over6","frontend " +  "wait for ip");
-        Intent intent = VpnService.prepare(this);
-        if (intent != null) {
-            startActivityForResult(intent, 0);
-        } else {
-            onActivityResult(0, RESULT_OK, null);
-        }
-
-        LinearLayout linearLayout = (LinearLayout)findViewById(R.id.linearLayout);
-        chart = ChartFactory.getTimeChartView(this, getDataset(), getRenderer(), "HH:mm:ss");
-        linearLayout.addView(chart);
     }
 
     /**
@@ -160,6 +162,16 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             tv_ipv4Addr.setText(MainActivity.IPv4Addr);
+            Intent intent = VpnService.prepare(m);
+            if (intent != null) {
+                m.startActivityForResult(intent, 0);
+            } else {
+                m.onActivityResult(0, RESULT_OK, null);
+            }
+
+            LinearLayout linearLayout = (LinearLayout)m.findViewById(R.id.linearLayout);
+            chart = ChartFactory.getTimeChartView(m, m.getDataset(), m.getRenderer(), "HH:mm:ss");
+            linearLayout.addView(chart);
         }
     };
 
@@ -178,7 +190,19 @@ public class MainActivity extends AppCompatActivity {
             tv_writeFlow.setText(Long.toString(MainActivity.writeFlow));
             tv_readIimes.setText(Long.toString(MainActivity.readTimes));
             tv_readFlow.setText(Long.toString(MainActivity.readFlow));
+            tv_speedup.setText("up: "+Long.toString(writeFlow - prewrite) + "B/s");
+            tv_speeddown.setText("down: "+Long.toString(readFlow - preread) + "B/s");
             MainActivity.updateChart();
+            preread = readFlow;
+            prewrite = writeFlow;
+        }
+    };
+
+    public static Runnable runnable1 = new Runnable() {
+        @Override
+        public void run() {
+            long runtime = System.currentTimeMillis() / 1000 - startTime;
+            ti.setText(Long.toString(runtime) + 's');
         }
     };
 

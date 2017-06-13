@@ -15,10 +15,11 @@ public class MyVpnService extends VpnService {
         super.onCreate();
         Builder builder = new Builder();
         builder.setMtu(5000);
-        Log.d("vpn","v4addr "+MainActivity.IPv4Addr);
+        Log.i("4over6","v4addr "+MainActivity.IPv4Addr);
         builder.addAddress(MainActivity.IPv4Addr,32);
         builder.addRoute("0.0.0.0",0);
         for(int i = 0; i < 3; i ++) {
+            Log.i("4over6",MainActivity.dns[i]);
             builder.addDnsServer(MainActivity.dns[i]);
         }
         builder.setSession("thu409bVPN");

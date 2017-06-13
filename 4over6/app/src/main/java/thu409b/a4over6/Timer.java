@@ -19,6 +19,7 @@ public class Timer {
         int readlen = -1;
         byte[] readBuf = new byte[1024];
         while(true) {
+            MainActivity.handler.post(MainActivity.runnable1);
             //MainActivity.handler.post(MainActivity.runnable);
             if(!MainActivity.flag) {
                 File file = new File(MainActivity.extDir, "IPPipe");

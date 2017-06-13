@@ -24,6 +24,8 @@
 #include "TnuReader.h"
 #include "ServerResponseReader.h"
 
+#define CONNECT_RETRY_TIME 5
+
 class BackEnd {
 public:
     static long long readFlow;
@@ -60,7 +62,7 @@ public:
     void run(char settingfile[]);
 
     void readSettings(const char* filename);
-    void initializeSocket();
+    bool initializeSocket();
     void setCurPath(std::string curPath);
     void establishPipes();
     void setTimer();

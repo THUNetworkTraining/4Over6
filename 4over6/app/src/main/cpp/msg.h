@@ -19,6 +19,8 @@
 #define NET_RESPONSE 103
 #define IP_HEARTBEAT 104
 
+#define MSG_HEADER_SIZE (sizeof(int) + sizeof(char))
+
 struct msg {
     int length;		//整个结构体的字节长度
     char type;		//类型

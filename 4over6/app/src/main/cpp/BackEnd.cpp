@@ -12,20 +12,25 @@
 time_t BackEnd::lastHeartbeatTime = 0;
 
 
-void BackEnd::initializeSocket() {
+bool BackEnd::initializeSocket() {
     this->serverSocket = socket(PF_INET6, SOCK_STREAM, 0);
     if(this->serverSocket == -1) {
         LOGF("cannot create socket! %s ",strerror(errno));
-        return;
+        return false;
     }
     sockaddr_in6 dest;
     dest.sin6_family = AF_INET6;
     dest.sin6_port = htons(this->serverPort);
     dest.sin6_addr = *(this->serverAddr);
-    if(connect(this->serverSocket, (struct sockaddr*) &dest, sizeof(dest)) != 0) {
-        LOGF("cannot connect to server! %s",strerror(errno));
-        return;
+    for(int i = 0; i < CONNECT_RETRY_TIME; i++){
+        if(connect(this->serverSocket, (struct sockaddr*) &dest, sizeof(dest)) != 0) {
+            LOGF("cannot connect to server! %s",strerror(errno));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+        else
+            return true;     // connect success
     }
+    return false; // connect failed
 }
 
 void BackEnd::readSettings(const char *filename) {
@@ -82,6 +87,7 @@ void BackEnd::requireIP() {
     ipmsg.type = IP_REQUEST;
     ipmsg.length = sizeof(int) + sizeof(char);
     write(this->serverSocket, (char*) &ipmsg, ipmsg.length);
+
     LOGD("requiring IP");
     char buffer[500] = {0};
     int readSize = 0;
@@ -104,6 +110,9 @@ void BackEnd::requireIP() {
             nextPtr++;
         strncpy(addr, data+prevPtr, nextPtr-prevPtr+1);               //copy substring between prevPtr and nextPtr
         addr[nextPtr-prevPtr] = '\0';
+        for(int i = 0; i < 50; i++)
+            if(addr[i] == '\n')
+                addr[i] = '\0';
         prevPtr = ++nextPtr;
         if(inet_aton(addr,&addrStruct) == 0)
             LOGD("wrong addr transform %s!",addr);
@@ -164,7 +173,8 @@ void BackEnd::heartbeatTimeout() {
 
 void BackEnd::run(char settingfile[]) {
     this->readSettings(settingfile);
-    this->initializeSocket();
+    if(!this->initializeSocket())
+        return;
     this->establishPipes();
     this->requireIP();
     this->setTimer();

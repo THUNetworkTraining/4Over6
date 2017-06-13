@@ -167,4 +167,24 @@
         android:layout_below="@+id/tv_ipv4Addr"
         android:id="@+id/linearLayout"></LinearLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/speedup"
+        android:layout_below="@+id/tv_ipv6Addr"
+        android:layout_alignRight="@+id/testInfo"
+        android:layout_alignEnd="@+id/testInfo" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/speeddown"
+        android:layout_above="@+id/linearLayout"
+        android:layout_alignRight="@+id/linearLayout"
+        android:layout_alignEnd="@+id/linearLayout" />
+
 </RelativeLayout>

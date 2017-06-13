@@ -36,6 +36,7 @@ void TnuReader::readTnu() {
 
 
     int writeLen = 0;
+
     writeLen = write(this->serverSocket, (void*)&m, m.length);
     /*LOGD("send server a packet size %d", writeLen);*/
     BackEnd::writeFlow += readLen;
